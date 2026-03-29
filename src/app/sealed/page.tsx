@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import EnvelopeAnimation from '@/components/sealed/EnvelopeAnimation';
+import SendConfirmation from '@/components/sealed/SendConfirmation';
 import Sparkles from '@/components/ui/Sparkles';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -16,13 +17,22 @@ function SealedContent() {
   const router = useRouter();
   const { getLetterById } = useLetters();
 
+  // Check if this is a send letter confirmation
+  const type = searchParams.get('type');
+  const sendId = searchParams.get('sendId');
+
+  if (type === 'send' && sendId) {
+    return <SendConfirmation sendId={sendId} />;
+  }
+
+  // Existing local letter seal confirmation
   const id = searchParams.get('id');
   const letter = id ? getLetterById(id) : null;
 
   const handleShare = async () => {
-    const text = `I just sealed a letter to my future self with Dear Me. It will be opened on ${
-      letter ? formatDisplayDate(letter.maturityDate) : 'a special day'
-    }.`;
+    const text = `Dear Me로 미래의 나에게 편지를 봉인했어요. ${
+      letter ? formatDisplayDate(letter.maturityDate) : '특별한 날'
+    }에 다시 만나요.`;
 
     if (navigator.share) {
       try {
@@ -56,7 +66,7 @@ function SealedContent() {
         transition={{ delay: 1.2, duration: 0.5 }}
         className="font-[family-name:var(--font-script)] text-3xl text-soft-black mb-4"
       >
-        Your letter has been sealed.
+        편지가 봉인되었어요.
       </motion.h2>
 
       <motion.p
@@ -65,8 +75,8 @@ function SealedContent() {
         transition={{ delay: 1.5, duration: 0.5 }}
         className="text-warm-gray text-sm leading-relaxed max-w-xs font-[family-name:var(--font-body)] mb-6"
       >
-        A whisper to your future self, now traveling through time.
-        Quietly resting until its moment of unveiling.
+        미래의 나에게 보내는 속삭임이
+        시간 속을 여행하고 있어요.
       </motion.p>
 
       {/* Unlock date */}
@@ -78,7 +88,7 @@ function SealedContent() {
           className="mb-8"
         >
           <p className="text-sm text-warm-gray/70 mb-2 font-[family-name:var(--font-body)]">
-            It will find you again on
+            다시 만날 날
           </p>
           <p className="text-lg font-[family-name:var(--font-heading)] font-semibold text-rose-gold">
             {formatDisplayDate(letter.maturityDate)}
@@ -94,7 +104,7 @@ function SealedContent() {
         className="space-y-3 w-full max-w-xs"
       >
         <Badge variant="locked" className="mx-auto mb-4">
-          In Transit to the Future
+          미래로 이동 중
         </Badge>
 
         <Button
@@ -104,14 +114,14 @@ function SealedContent() {
           icon={<ArrowRight size={18} />}
           onClick={() => router.push('/archive')}
         >
-          Return to Archive
+          보관함으로
         </Button>
 
         <button
           onClick={handleShare}
           className="text-xs text-warm-gray/50 tracking-[0.15em] uppercase font-semibold font-[family-name:var(--font-body)] hover:text-rose-gold transition-colors mt-4 cursor-pointer"
         >
-          Share this moment
+          이 순간 공유하기
         </button>
       </motion.div>
     </motion.div>
