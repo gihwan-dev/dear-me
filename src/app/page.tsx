@@ -166,7 +166,6 @@ export default function WritePage() {
   const isSelf = mode === 'self';
   const isLanding = currentStep === 'landing';
   const isLastStep = currentStep === 'delivery';
-  const showBottomButton = !isLanding;
 
   return (
     <div className="flex flex-col h-[calc(100dvh-56px)] overflow-hidden">
@@ -193,7 +192,7 @@ export default function WritePage() {
             className="absolute inset-0"
           >
             {currentStep === 'landing' && (
-              <StepLanding onStart={goNext} />
+              <StepLanding />
             )}
             {currentStep === 'mode' && (
               <StepMode mode={mode} onModeChange={setMode} />
@@ -252,54 +251,52 @@ export default function WritePage() {
         </motion.p>
       )}
 
-      {/* Bottom fixed button */}
-      {showBottomButton && (
-        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          {!isLastStep ? (
-            <button
-              onClick={goNext}
-              disabled={!isStepValid(currentStep)}
-              className={`
-                w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
-                transition-all duration-200 cursor-pointer
-                ${
-                  isStepValid(currentStep)
-                    ? 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
-                    : 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
-                }
-              `}
-            >
-              다음
-            </button>
-          ) : (
-            <button
-              onClick={handlePaymentRequest}
-              disabled={isLoading || !isStepValid('delivery')}
-              className={`
-                w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
-                transition-all duration-200 cursor-pointer flex items-center justify-center gap-2
-                ${
-                  isLoading || !isStepValid('delivery')
-                    ? 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
-                    : 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
-                }
-              `}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  결제 처리 중...
-                </>
-              ) : (
-                <>
-                  <CreditCard size={18} />
-                  편지 보내기 (490원)
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      )}
+      {/* Bottom fixed button — always visible, same position */}
+      <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+        {isLastStep ? (
+          <button
+            onClick={handlePaymentRequest}
+            disabled={isLoading || !isStepValid('delivery')}
+            className={`
+              w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
+              transition-all duration-200 cursor-pointer flex items-center justify-center gap-2
+              ${
+                isLoading || !isStepValid('delivery')
+                  ? 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
+                  : 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
+              }
+            `}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                결제 처리 중...
+              </>
+            ) : (
+              <>
+                <CreditCard size={18} />
+                편지 보내기 (490원)
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={goNext}
+            disabled={!isStepValid(currentStep)}
+            className={`
+              w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
+              transition-all duration-200 cursor-pointer
+              ${
+                isStepValid(currentStep)
+                  ? 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
+                  : 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
+              }
+            `}
+          >
+            {isLanding ? '편지 쓰기' : '다음'}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
