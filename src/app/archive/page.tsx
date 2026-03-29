@@ -32,20 +32,19 @@ export default function ArchivePage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="py-2 space-y-0"
+      className="py-2 px-5 space-y-0"
     >
       {/* Header + New Letter — one visual block */}
       <div className="space-y-4 pb-6">
         <div>
-          <p className="text-[11px] text-rose-gold tracking-[0.2em] uppercase font-semibold font-[family-name:var(--font-body)]">
-            Personal Archive
+          <p className="text-[11px] text-rose-gold tracking-[0.2em] font-semibold font-[family-name:var(--font-body)]">
+            보관함
           </p>
-          <h2 className="font-[family-name:var(--font-heading)] text-2xl font-semibold text-soft-black mt-1">
-            Sent to the Future
+          <h2 className="font-[family-name:var(--font-title-hand)] text-2xl text-soft-black mt-1">
+            시간 여행 중인 편지들
           </h2>
           <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)] leading-relaxed">
-            These words are traveling through time.
-            Quietly resting until their moment of unveiling.
+            마음을 담은 편지가 시간을 건너 전달될 날을 기다리고 있어요.
           </p>
         </div>
 
@@ -63,7 +62,7 @@ export default function ArchivePage() {
           "
         >
           <PenLine size={16} />
-          New Letter
+          새 편지 쓰기
         </button>
       </div>
 
@@ -73,7 +72,7 @@ export default function ArchivePage() {
       {/* Filter */}
       <div className="space-y-2 pb-4">
         <p className="text-[10px] text-warm-gray/50 tracking-[0.15em] uppercase font-semibold font-[family-name:var(--font-body)]">
-          View By
+          필터
         </p>
         <FilterTabs activeFilter={filter} onFilterChange={setFilter} />
       </div>

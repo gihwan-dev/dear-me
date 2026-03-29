@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocalStorage } from './useLocalStorage';
 import { isMatured } from '@/lib/dates';
 import type { Letter, LetterFilter } from '@/types/letter';
-import { gradientPresets } from '@/lib/gradients';
+import { letterStyles } from '@/lib/letterStyles';
 
 const LETTERS_KEY = 'dear-me-letters';
 
@@ -82,7 +82,7 @@ export function useLetters() {
         content,
         maturityDate,
         status: 'sealed',
-        backgroundGradient: gradient || gradientPresets[0].value,
+        backgroundGradient: gradient || letterStyles[0].key,
       });
     },
     [addLetter]
@@ -95,7 +95,7 @@ export function useLetters() {
         content,
         maturityDate: '',
         status: 'draft',
-        backgroundGradient: gradient || gradientPresets[0].value,
+        backgroundGradient: gradient || letterStyles[0].key,
       });
     },
     [addLetter]

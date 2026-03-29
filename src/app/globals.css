@@ -14,6 +14,12 @@
   --color-sage-dark: #8BAF85;
   --color-warm-gray: #6B5B6E;
   --color-soft-black: #3D2C3E;
+
+  /* Letter paper */
+  --color-paper: #FFFDF7;
+  --color-paper-line: #E8DDD3;
+  --color-ink: #4A3728;
+  --color-ink-light: #8B7765;
 }
 
 @theme inline {
@@ -31,9 +37,16 @@
   --color-warm-gray: var(--color-warm-gray);
   --color-soft-black: var(--color-soft-black);
 
+  --color-paper: var(--color-paper);
+  --color-paper-line: var(--color-paper-line);
+  --color-ink: var(--color-ink);
+  --color-ink-light: var(--color-ink-light);
+
   --font-heading: var(--font-playfair);
   --font-body: var(--font-nunito);
   --font-script: var(--font-dancing);
+  --font-handwriting: var(--font-nanum-pen);
+  --font-title-hand: var(--font-gamja);
 
   --shadow-soft: 0 2px 12px rgba(212, 168, 154, 0.12);
   --shadow-card: 0 4px 20px rgba(212, 168, 154, 0.10);

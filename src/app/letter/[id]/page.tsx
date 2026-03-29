@@ -23,13 +23,13 @@ export default function LetterReadPage({
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
         <p className="text-warm-gray font-[family-name:var(--font-body)]">
-          This letter is not available yet.
+          아직 열 수 없는 편지예요.
         </p>
         <button
           onClick={() => router.push('/archive')}
           className="mt-4 text-rose-gold font-semibold text-sm cursor-pointer"
         >
-          Back to Archive
+          보관함으로
         </button>
       </div>
     );
@@ -40,7 +40,7 @@ export default function LetterReadPage({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="py-2 space-y-6"
+      className="py-2 px-5 space-y-6"
     >
       {/* Back button */}
       <button
@@ -48,7 +48,7 @@ export default function LetterReadPage({
         className="flex items-center gap-1 text-warm-gray hover:text-rose-gold transition-colors cursor-pointer"
       >
         <ChevronLeft size={20} />
-        <span className="text-sm font-[family-name:var(--font-body)]">Archive</span>
+        <span className="text-sm font-[family-name:var(--font-body)]">보관함</span>
       </button>
 
       {/* Letter Card */}
@@ -65,7 +65,7 @@ export default function LetterReadPage({
 
           {/* Date */}
           <p className="text-xs text-white/50 font-[family-name:var(--font-body)] mb-6">
-            Written on {formatDisplayDate(letter.createdAt)}
+            {formatDisplayDate(letter.createdAt)} 작성
           </p>
 
           {/* Divider */}
@@ -82,11 +82,11 @@ export default function LetterReadPage({
       <div className="flex flex-col gap-2 px-2">
         <div className="flex items-center gap-2 text-xs text-warm-gray/50 font-[family-name:var(--font-body)]">
           <Calendar size={14} />
-          Sealed on {formatDisplayDate(letter.createdAt)}
+          {formatDisplayDate(letter.createdAt)} 봉인
         </div>
         <div className="flex items-center gap-2 text-xs text-sage-dark font-[family-name:var(--font-body)]">
           <LockOpen size={14} />
-          Opened on {formatDisplayDate(letter.maturityDate)}
+          {formatDisplayDate(letter.maturityDate)} 열림
         </div>
       </div>
     </motion.div>

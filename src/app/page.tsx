@@ -1,29 +1,46 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import WriteCard from '@/components/write/WriteCard';
-import MaturityPicker from '@/components/write/MaturityPicker';
-import SealButton from '@/components/write/SealButton';
-import SendToggle from '@/components/write/SendToggle';
-import RecipientForm from '@/components/write/RecipientForm';
-import PaymentButton from '@/components/write/PaymentButton';
-import { useLetters } from '@/hooks/useLetters';
-import { addMaturityPeriod, toISOString, todayFormatted } from '@/lib/dates';
-import { gradientPresets } from '@/lib/gradients';
+import { CreditCard, Loader2 } from 'lucide-react';
+import FunnelProgress from '@/components/write/FunnelProgress';
+import StepLanding from '@/components/write/steps/StepLanding';
+import StepMode from '@/components/write/steps/StepMode';
+import StepSender from '@/components/write/steps/StepSender';
+import StepRecipient from '@/components/write/steps/StepRecipient';
+import StepPhone from '@/components/write/steps/StepPhone';
+import StepLetter from '@/components/write/steps/StepLetter';
+import StepDelivery from '@/components/write/steps/StepDelivery';
+import { addMaturityPeriod, toISOString } from '@/lib/dates';
+import { letterStyles } from '@/lib/letterStyles';
 import type { MaturityPeriod } from '@/types/letter';
 
+// Step identifiers — order depends on mode
+type StepId = 'landing' | 'mode' | 'sender' | 'recipient' | 'phone' | 'letter' | 'delivery';
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0,
+  }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({
+    x: direction > 0 ? '-100%' : '100%',
+    opacity: 0,
+  }),
+};
+
 export default function WritePage() {
-  const router = useRouter();
-  const { createNewLetter, saveDraft } = useLetters();
+  // Funnel state
+  const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
 
   // Letter content
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState<MaturityPeriod>('6m');
   const [customDate, setCustomDate] = useState('');
-  const [selectedGradient, setSelectedGradient] = useState(gradientPresets[0].value);
+  const [selectedStyle, setSelectedStyle] = useState(letterStyles[0].key);
 
   // Send mode
   const [mode, setMode] = useState<'self' | 'send'>('self');
@@ -32,55 +49,78 @@ export default function WritePage() {
   const [recipientPhone, setRecipientPhone] = useState('');
 
   // UI state
-  const [isSealing, setIsSealing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showSaved, setShowSaved] = useState(false);
+
+  // Dynamic steps based on mode
+  const steps: StepId[] = useMemo(() => {
+    const base: StepId[] = ['landing', 'mode', 'sender'];
+    if (mode === 'send') base.push('recipient');
+    base.push('phone', 'letter', 'delivery');
+    return base;
+  }, [mode]);
+
+  const currentStep = steps[stepIndex];
+  const totalFormSteps = steps.length - 1; // exclude landing
+  const formStepIndex = stepIndex; // landing = 0, rest = 1..N
 
   const computeMaturityDate = useCallback(() => {
     if (selectedPeriod === 'custom') return customDate;
     return toISOString(addMaturityPeriod(new Date(), selectedPeriod));
   }, [selectedPeriod, customDate]);
 
-  const validate = (): boolean => {
-    if (!title.trim()) {
-      setError('편지 제목을 써주세요');
-      return false;
+  // Step validation
+  const isStepValid = (id: StepId): boolean => {
+    switch (id) {
+      case 'landing':
+        return true;
+      case 'mode':
+        return true; // always valid, selection auto-advances or "다음" works
+      case 'sender':
+        return !!senderName.trim();
+      case 'recipient':
+        return !!recipientName.trim();
+      case 'phone':
+        return recipientPhone.replace(/-/g, '').length >= 10;
+      case 'letter':
+        return !!title.trim() && !!content.trim();
+      case 'delivery':
+        return !!computeMaturityDate();
+      default:
+        return false;
     }
-    if (!content.trim()) {
-      setError('편지 내용을 써주세요');
-      return false;
-    }
-    if (!senderName.trim()) {
-      setError('보내는 사람 이름을 입력해주세요');
-      return false;
-    }
-    if (mode === 'send' && !recipientName.trim()) {
-      setError('받는 사람 이름을 입력해주세요');
-      return false;
-    }
-    if (!recipientPhone || recipientPhone.length < 10) {
-      setError('전화번호를 입력해주세요');
-      return false;
-    }
-    const maturityDate = computeMaturityDate();
-    if (!maturityDate) {
-      setError('날짜를 선택해주세요');
-      return false;
-    }
-    setError('');
-    return true;
   };
 
-  // Payment flow — create letter in Supabase, then open Toss payment
+  const goNext = () => {
+    if (stepIndex < steps.length - 1 && isStepValid(currentStep)) {
+      setDirection(1);
+      setError('');
+      setStepIndex((s) => s + 1);
+    }
+  };
+
+  const goBack = () => {
+    if (stepIndex > 0) {
+      setDirection(-1);
+      setError('');
+      // When going back from phone step and we're in self mode,
+      // we need to skip recipient step which doesn't exist
+      setStepIndex((s) => s - 1);
+    }
+  };
+
+  // Payment flow
   const handlePaymentRequest = async () => {
-    if (!validate()) return;
+    if (!isStepValid('delivery')) return;
+
+    setIsLoading(true);
+    setError('');
 
     const maturityDate = computeMaturityDate();
     const isSelf = mode === 'self';
     const finalRecipientName = isSelf ? senderName : recipientName;
 
     try {
-      // 1. Create letter in Supabase
       const res = await fetch('/api/letters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,14 +132,13 @@ export default function WritePage() {
           recipientPhone,
           isSelfLetter: isSelf,
           maturityDate,
-          backgroundGradient: selectedGradient,
+          backgroundGradient: selectedStyle,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // 2. Load Toss Payment Widget and request payment
       const { loadPaymentWidget } = await import(
         '@tosspayments/payment-widget-sdk'
       );
@@ -114,135 +153,153 @@ export default function WritePage() {
       });
     } catch (err) {
       if (err instanceof Error && err.message.includes('USER_CANCEL')) {
-        // User cancelled payment — do nothing
+        setIsLoading(false);
         return;
       }
       console.error('Payment request failed:', err);
       setError('결제 요청 중 오류가 발생했어요. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Legacy seal for local letters (draft → seal without payment, kept for future)
-  const handleSeal = async () => {
-    if (!title.trim() || !content.trim()) {
-      setError('편지 제목과 내용을 모두 써주세요');
-      return;
-    }
-    setError('');
-    setIsSealing(true);
-
-    const maturityDate = computeMaturityDate();
-    if (!maturityDate) {
-      setError('날짜를 선택해주세요');
-      setIsSealing(false);
-      return;
-    }
-
-    await new Promise((r) => setTimeout(r, 800));
-    const letter = createNewLetter(title, content, maturityDate, selectedGradient);
-    setIsSealing(false);
-    router.push(`/sealed?id=${letter.id}`);
-  };
-
-  const handleSaveDraft = () => {
-    if (!title.trim() && !content.trim()) return;
-    saveDraft(title, content, selectedGradient);
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2000);
-    setTitle('');
-    setContent('');
-  };
+  const isSelf = mode === 'self';
+  const isLanding = currentStep === 'landing';
+  const isLastStep = currentStep === 'delivery';
+  const showBottomButton = !isLanding;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="space-y-6 py-2"
-    >
-      {/* Entry Date */}
-      <div className="text-center">
-        <p className="text-[11px] text-rose-gold tracking-[0.2em] uppercase font-semibold font-[family-name:var(--font-body)]">
-          Entry Date
-        </p>
-        <p className="text-lg font-[family-name:var(--font-heading)] text-soft-black mt-1">
-          {todayFormatted()}
-        </p>
+    <div className="flex flex-col h-[calc(100dvh-56px)] overflow-hidden">
+      {/* Progress bar + Back button (hidden on landing) */}
+      {!isLanding && (
+        <FunnelProgress
+          step={formStepIndex}
+          totalSteps={totalFormSteps}
+          onBack={goBack}
+        />
+      )}
+
+      {/* Step content */}
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep}
+            custom={direction}
+            variants={isLanding ? undefined : slideVariants}
+            initial={isLanding ? { opacity: 0 } : 'enter'}
+            animate={isLanding ? { opacity: 1 } : 'center'}
+            exit={isLanding ? { opacity: 0 } : 'exit'}
+            transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
+            className="absolute inset-0"
+          >
+            {currentStep === 'landing' && (
+              <StepLanding onStart={goNext} />
+            )}
+            {currentStep === 'mode' && (
+              <StepMode mode={mode} onModeChange={setMode} />
+            )}
+            {currentStep === 'sender' && (
+              <StepSender
+                senderName={senderName}
+                onSenderNameChange={setSenderName}
+              />
+            )}
+            {currentStep === 'recipient' && (
+              <StepRecipient
+                recipientName={recipientName}
+                onRecipientNameChange={setRecipientName}
+              />
+            )}
+            {currentStep === 'phone' && (
+              <StepPhone
+                recipientPhone={recipientPhone}
+                isSelfLetter={isSelf}
+                onRecipientPhoneChange={setRecipientPhone}
+              />
+            )}
+            {currentStep === 'letter' && (
+              <StepLetter
+                title={title}
+                content={content}
+                selectedStyle={selectedStyle}
+                senderName={senderName}
+                recipientName={isSelf ? senderName : recipientName}
+                onTitleChange={setTitle}
+                onContentChange={setContent}
+                onStyleChange={setSelectedStyle}
+              />
+            )}
+            {currentStep === 'delivery' && (
+              <StepDelivery
+                selectedPeriod={selectedPeriod}
+                customDate={customDate}
+                onPeriodChange={setSelectedPeriod}
+                onCustomDateChange={setCustomDate}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Send Mode Toggle */}
-      <SendToggle mode={mode} onChange={setMode} />
-
-      {/* Recipient Form */}
-      <AnimatePresence mode="wait">
-        <RecipientForm
-          key={mode}
-          senderName={senderName}
-          recipientName={recipientName}
-          recipientPhone={recipientPhone}
-          isSelfLetter={mode === 'self'}
-          onSenderNameChange={setSenderName}
-          onRecipientNameChange={setRecipientName}
-          onRecipientPhoneChange={setRecipientPhone}
-        />
-      </AnimatePresence>
-
-      {/* Write Card */}
-      <WriteCard
-        title={title}
-        content={content}
-        selectedGradient={selectedGradient}
-        onTitleChange={setTitle}
-        onContentChange={setContent}
-        onGradientChange={setSelectedGradient}
-      />
-
-      {/* Maturity Picker */}
-      <MaturityPicker
-        selectedPeriod={selectedPeriod}
-        customDate={customDate}
-        onPeriodChange={setSelectedPeriod}
-        onCustomDateChange={setCustomDate}
-      />
-
-      {/* Error Message */}
+      {/* Error message */}
       {error && (
         <motion.p
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-sm text-rose-gold text-center font-[family-name:var(--font-body)]"
+          className="text-sm text-rose-gold text-center font-[family-name:var(--font-body)] px-5 pb-2"
         >
           {error}
         </motion.p>
       )}
 
-      {/* Payment / Seal Button */}
-      <PaymentButton
-        onPaymentRequest={handlePaymentRequest}
-        disabled={isSealing}
-      />
-
-      {/* Save as Draft */}
-      <div className="text-center">
-        <button
-          onClick={handleSaveDraft}
-          className="text-xs text-warm-gray/60 tracking-[0.15em] uppercase font-semibold font-[family-name:var(--font-body)] hover:text-rose-gold transition-colors cursor-pointer"
-        >
-          임시 저장
-        </button>
-      </div>
-
-      {/* Draft Saved Toast */}
-      {showSaved && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-sage/90 text-white px-5 py-2.5 rounded-full text-sm font-[family-name:var(--font-body)] shadow-card"
-        >
-          임시 저장 완료!
-        </motion.div>
+      {/* Bottom fixed button */}
+      {showBottomButton && (
+        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          {!isLastStep ? (
+            <button
+              onClick={goNext}
+              disabled={!isStepValid(currentStep)}
+              className={`
+                w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
+                transition-all duration-200 cursor-pointer
+                ${
+                  isStepValid(currentStep)
+                    ? 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
+                    : 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
+                }
+              `}
+            >
+              다음
+            </button>
+          ) : (
+            <button
+              onClick={handlePaymentRequest}
+              disabled={isLoading || !isStepValid('delivery')}
+              className={`
+                w-full py-4 rounded-2xl text-base font-semibold font-[family-name:var(--font-body)]
+                transition-all duration-200 cursor-pointer flex items-center justify-center gap-2
+                ${
+                  isLoading || !isStepValid('delivery')
+                    ? 'bg-warm-gray/15 text-warm-gray/40 cursor-not-allowed'
+                    : 'bg-rose-gold text-white shadow-soft active:scale-[0.98]'
+                }
+              `}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  결제 처리 중...
+                </>
+              ) : (
+                <>
+                  <CreditCard size={18} />
+                  편지 보내기 (490원)
+                </>
+              )}
+            </button>
+          )}
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }

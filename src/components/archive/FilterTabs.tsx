@@ -9,9 +9,9 @@ interface FilterTabsProps {
 }
 
 const filters: { value: LetterFilter; label: string }[] = [
-  { value: 'all', label: 'All Letters' },
-  { value: 'locked', label: 'Locked' },
-  { value: 'unlocked', label: 'Unlocked' },
+  { value: 'all', label: '전체' },
+  { value: 'locked', label: '봉인됨' },
+  { value: 'unlocked', label: '열림' },
 ];
 
 export default function FilterTabs({ activeFilter, onFilterChange }: FilterTabsProps) {

@@ -62,11 +62,11 @@ export default function LetterCard({ letter, onClick, index }: LetterCardProps) 
             {letter.title}
           </h3>
           <p className="text-[11px] text-warm-gray/60 mt-0.5 font-[family-name:var(--font-body)]">
-            Written on {formatDisplayDate(letter.createdAt)}
+            {formatDisplayDate(letter.createdAt)} 작성
           </p>
           <div className="mt-2.5">
             {isUnlocked ? (
-              <Badge variant="unlocked">Unlocked ✦</Badge>
+              <Badge variant="unlocked">열림 ✦</Badge>
             ) : isSoon ? (
               <Badge variant="soon">{days}일 후 해금</Badge>
             ) : (

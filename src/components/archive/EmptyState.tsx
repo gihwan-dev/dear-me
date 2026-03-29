@@ -26,11 +26,11 @@ export default function EmptyState() {
       </div>
 
       <h3 className="font-[family-name:var(--font-heading)] text-lg font-semibold text-soft-black mb-2">
-        No letters yet
+        아직 편지가 없어요
       </h3>
       <p className="text-sm text-warm-gray/60 font-[family-name:var(--font-body)] mb-6 max-w-xs">
-        Write your first letter to the future.
-        Your words will wait for you.
+        미래의 나에게 첫 편지를 써보세요.
+        당신의 마음이 시간을 건너 전달될 거예요.
       </p>
 
       <button
@@ -46,7 +46,7 @@ export default function EmptyState() {
         "
       >
         <PenLine size={16} />
-        Write a Letter
+        편지 쓰기
       </button>
     </motion.div>
   );
