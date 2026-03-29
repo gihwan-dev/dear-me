@@ -40,5 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# optimized images (regenerated at build time)
-/public/images/optimized
+# original source images (large PNGs, regenerate optimized with npm run optimize-images)
+/public/images/*.png
+/public/images/decorations/*.png
