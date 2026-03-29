@@ -21,7 +21,7 @@ export default function StepSender({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-14 pb-8">
+      <div className="pt-4 pb-8">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           보내는 사람은 누구인가요?
         </h2>

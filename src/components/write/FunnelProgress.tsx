@@ -11,7 +11,7 @@ interface FunnelProgressProps {
 
 export default function FunnelProgress({ step, totalSteps, onBack }: FunnelProgressProps) {
   return (
-    <div className="relative">
+    <div className="relative z-10">
       {/* Progress bar */}
       <div className="h-[3px] bg-blush/30 w-full">
         <motion.div
@@ -21,19 +21,20 @@ export default function FunnelProgress({ step, totalSteps, onBack }: FunnelProgr
         />
       </div>
 
-      {/* Back button */}
-      {step > 0 && (
-        <motion.button
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -8 }}
-          onClick={onBack}
-          className="absolute top-4 left-1 flex items-center gap-1 text-warm-gray text-sm font-[family-name:var(--font-body)] cursor-pointer hover:text-rose-gold transition-colors"
-        >
-          <ChevronLeft size={20} />
-          <span>이전</span>
-        </motion.button>
-      )}
+      {/* Back button row */}
+      <div className="h-10 flex items-center px-1">
+        {step > 0 && (
+          <motion.button
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={onBack}
+            className="flex items-center gap-1 text-warm-gray text-sm font-[family-name:var(--font-body)] cursor-pointer hover:text-rose-gold transition-colors"
+          >
+            <ChevronLeft size={20} />
+            <span>이전</span>
+          </motion.button>
+        )}
+      </div>
     </div>
   );
 }

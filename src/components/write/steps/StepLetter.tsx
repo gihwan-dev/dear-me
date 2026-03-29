@@ -46,7 +46,7 @@ export default function StepLetter({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-12 pb-3">
+      <div className="pt-2 pb-3">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           마음을 담아 써주세요
         </h2>

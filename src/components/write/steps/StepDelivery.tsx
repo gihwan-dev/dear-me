@@ -31,7 +31,7 @@ export default function StepDelivery({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-14 pb-6">
+      <div className="pt-4 pb-6">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           언제 전달할까요?
         </h2>

@@ -38,7 +38,7 @@ export default function StepPhone({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-14 pb-6">
+      <div className="pt-4 pb-6">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           {isSelfLetter
             ? '편지를 받을 내 번호를\n알려주세요'

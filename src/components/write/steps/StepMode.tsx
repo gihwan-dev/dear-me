@@ -15,7 +15,7 @@ export default function StepMode({ mode, onModeChange }: StepModeProps) {
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-14 pb-8">
+      <div className="pt-4 pb-8">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           누구에게 보낼까요?
         </h2>
