@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { generateViewCode } from '@/lib/viewCode';
+import { LETTER_PRICE } from '@/lib/paymentConstants';
 import { nanoid } from 'nanoid';
 
 export async function POST(request: Request) {
@@ -44,8 +45,9 @@ export async function POST(request: Request) {
         delivery_status: 'pending',
         payment_status: 'pending',
         merchant_uid: merchantUid,
+        payment_amount: LETTER_PRICE,
       })
-      .select('id, view_code, merchant_uid')
+      .select('id, view_code, merchant_uid, payment_amount')
       .single();
 
     if (error) {
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
       letterId: data.id,
       viewCode: data.view_code,
       merchantUid: data.merchant_uid,
+      paymentAmount: data.payment_amount,
     });
   } catch (err) {
     console.error('Letter creation error:', err);

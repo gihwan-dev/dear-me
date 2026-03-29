@@ -6,11 +6,13 @@ import { User } from 'lucide-react';
 interface StepSenderProps {
   senderName: string;
   onSenderNameChange: (v: string) => void;
+  onAdvance: () => void;
 }
 
 export default function StepSender({
   senderName,
   onSenderNameChange,
+  onAdvance,
 }: StepSenderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -18,6 +20,18 @@ export default function StepSender({
     const timer = setTimeout(() => inputRef.current?.focus(), 350);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (senderName.trim()) {
+      onAdvance();
+    }
+  };
 
   return (
     <div className="flex flex-col h-full px-5">
@@ -42,7 +56,11 @@ export default function StepSender({
               type="text"
               value={senderName}
               onChange={(e) => onSenderNameChange(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="이름을 입력하세요"
+              autoComplete="name"
+              inputMode="text"
+              enterKeyHint="next"
               className="w-full bg-transparent text-soft-black text-lg font-[family-name:var(--font-body)] outline-none placeholder:text-warm-gray/30"
             />
           </div>

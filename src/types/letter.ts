@@ -38,6 +38,7 @@ export interface SendLetter {
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
   merchantUid: string;
+  paymentAmount: number;
   paymentKey?: string;
   paidAt?: string;
   deliveredAt?: string;
@@ -59,6 +60,7 @@ export interface SendLetterRow {
   delivery_status: DeliveryStatus;
   payment_status: PaymentStatus;
   merchant_uid: string;
+  payment_amount: number;
   payment_key: string | null;
   paid_at: string | null;
   delivered_at: string | null;
@@ -81,6 +83,7 @@ export function rowToSendLetter(row: SendLetterRow): SendLetter {
     deliveryStatus: row.delivery_status,
     paymentStatus: row.payment_status,
     merchantUid: row.merchant_uid,
+    paymentAmount: row.payment_amount,
     paymentKey: row.payment_key ?? undefined,
     paidAt: row.paid_at ?? undefined,
     deliveredAt: row.delivered_at ?? undefined,

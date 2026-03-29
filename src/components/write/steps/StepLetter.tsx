@@ -44,6 +44,15 @@ export default function StepLetter({
 
   const style = letterStyles.find((s) => s.key === selectedStyle) || letterStyles[0];
 
+  const handleTitleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    textareaRef.current?.focus();
+  };
+
   return (
     <div className="flex flex-col h-full px-5">
       <div className="pt-2 pb-3">
@@ -99,7 +108,11 @@ export default function StepLetter({
             type="text"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
+            onKeyDown={handleTitleKeyDown}
             placeholder="편지 제목"
+            autoComplete="off"
+            inputMode="text"
+            enterKeyHint="next"
             className="w-full bg-transparent border-none outline-none font-semibold font-[family-name:var(--font-title-hand)]"
             style={{
               color: style.textColor,
@@ -116,6 +129,8 @@ export default function StepLetter({
             value={content}
             onChange={(e) => onContentChange(e.target.value)}
             placeholder="마음을 담아 편지를 써보세요..."
+            autoComplete="off"
+            enterKeyHint="enter"
             className="w-full bg-transparent border-none outline-none resize-none font-[family-name:var(--font-handwriting)]"
             style={{
               color: style.textColor,

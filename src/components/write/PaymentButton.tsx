@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Loader2 } from 'lucide-react';
+import { LETTER_PRICE_LABEL } from '@/lib/paymentConstants';
 
 interface PaymentButtonProps {
   disabled?: boolean;
@@ -51,7 +52,7 @@ export default function PaymentButton({ disabled, onPaymentRequest }: PaymentBut
       ) : (
         <>
           <CreditCard size={20} />
-          편지 보내기 (490원)
+          편지 보내기 ({LETTER_PRICE_LABEL})
         </>
       )}
     </motion.button>

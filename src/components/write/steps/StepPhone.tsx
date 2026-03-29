@@ -2,38 +2,49 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Phone } from 'lucide-react';
+import { formatPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
 
 interface StepPhoneProps {
   recipientPhone: string;
   isSelfLetter: boolean;
   onRecipientPhoneChange: (v: string) => void;
-}
-
-function formatPhone(value: string): string {
-  const digits = value.replace(/[^0-9]/g, '');
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+  onAdvance: () => void;
 }
 
 export default function StepPhone({
   recipientPhone,
   isSelfLetter,
   onRecipientPhoneChange,
+  onAdvance,
 }: StepPhoneProps) {
   const phoneRef = useRef<HTMLInputElement>(null);
-  const [phoneRaw, setPhoneRaw] = useState(formatPhone(recipientPhone));
+  const [phoneRaw, setPhoneRaw] = useState(formatPhoneNumber(recipientPhone));
 
   useEffect(() => {
     const timer = setTimeout(() => phoneRef.current?.focus(), 350);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    setPhoneRaw(formatPhoneNumber(recipientPhone));
+  }, [recipientPhone]);
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9-]/g, '');
-    const formatted = formatPhone(raw);
+    const formatted = formatPhoneNumber(e.target.value);
     setPhoneRaw(formatted);
-    onRecipientPhoneChange(formatted.replace(/-/g, ''));
+    onRecipientPhoneChange(normalizePhoneNumber(formatted));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (normalizePhoneNumber(phoneRaw).length >= 10) {
+      onAdvance();
+    }
   };
 
   return (
@@ -61,8 +72,12 @@ export default function StepPhone({
               type="tel"
               value={phoneRaw}
               onChange={handlePhoneChange}
+              onKeyDown={handleKeyDown}
               placeholder="010-0000-0000"
               maxLength={13}
+              autoComplete="tel-national"
+              inputMode="tel"
+              enterKeyHint="next"
               className="w-full bg-transparent text-soft-black text-lg font-[family-name:var(--font-body)] outline-none placeholder:text-warm-gray/30 tracking-wide"
             />
           </div>

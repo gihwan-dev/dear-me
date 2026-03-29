@@ -27,6 +27,7 @@ export async function confirmPayment(
   const response = await fetch(
     'https://api.tosspayments.com/v1/payments/confirm',
     {
+      cache: 'no-store',
       method: 'POST',
       headers: {
         Authorization: `Basic ${encoded}`,

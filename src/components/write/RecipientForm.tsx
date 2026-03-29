@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Phone, BookUser } from 'lucide-react';
+import {
+  canUseContactPicker,
+  selectSingleContact,
+} from '@/lib/contactPicker';
+import { formatPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
 
 interface RecipientFormProps {
   senderName: string;
@@ -14,13 +19,6 @@ interface RecipientFormProps {
   onRecipientPhoneChange: (v: string) => void;
 }
 
-function formatPhone(value: string): string {
-  const digits = value.replace(/[^0-9]/g, '');
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
-}
-
 export default function RecipientForm({
   senderName,
   recipientName,
@@ -30,37 +28,49 @@ export default function RecipientForm({
   onRecipientNameChange,
   onRecipientPhoneChange,
 }: RecipientFormProps) {
-  const [phoneRaw, setPhoneRaw] = useState(recipientPhone);
+  const [phoneRaw, setPhoneRaw] = useState(formatPhoneNumber(recipientPhone));
+  const [contactPickerSupported, setContactPickerSupported] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setPhoneRaw(formatPhoneNumber(recipientPhone));
+  }, [recipientPhone]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void canUseContactPicker().then((supported) => {
+      if (isMounted) {
+        setContactPickerSupported(supported);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^0-9-]/g, '');
-    const formatted = formatPhone(raw);
+    const formatted = formatPhoneNumber(e.target.value);
     setPhoneRaw(formatted);
-    onRecipientPhoneChange(formatted.replace(/-/g, ''));
+    onRecipientPhoneChange(normalizePhoneNumber(formatted));
   };
 
   const handleContactPicker = async () => {
     try {
-      // Contact Picker API
-      if ('contacts' in navigator && 'ContactsManager' in window) {
-        const contacts = await (navigator as unknown as { contacts: { select: (props: string[], opts: { multiple: boolean }) => Promise<Array<{ name: string[]; tel: string[] }>> } }).contacts.select(
-          ['name', 'tel'],
-          { multiple: false },
-        );
-        if (contacts.length > 0) {
-          const contact = contacts[0];
-          if (contact.name?.[0]) {
-            onRecipientNameChange(contact.name[0]);
-          }
-          if (contact.tel?.[0]) {
-            const phone = contact.tel[0].replace(/[^0-9]/g, '');
-            const formatted = formatPhone(phone);
-            setPhoneRaw(formatted);
-            onRecipientPhoneChange(phone);
-          }
-        }
-      } else {
-        alert('이 브라우저에서는 연락처 선택이 지원되지 않아요.\n직접 입력해주세요.');
+      const contact = await selectSingleContact();
+
+      if (!contact) {
+        return;
+      }
+
+      if (contact.name) {
+        onRecipientNameChange(contact.name);
+      }
+
+      if (contact.phone) {
+        const formatted = formatPhoneNumber(contact.phone);
+        setPhoneRaw(formatted);
+        onRecipientPhoneChange(contact.phone);
       }
     } catch {
       // User cancelled or API not available
@@ -99,13 +109,16 @@ export default function RecipientForm({
             <label className="text-[11px] text-warm-gray/60 uppercase tracking-wider font-semibold font-[family-name:var(--font-body)]">
               받는 사람
             </label>
-            <button
-              onClick={handleContactPicker}
-              className="flex items-center gap-1 text-[11px] text-rose-gold font-semibold font-[family-name:var(--font-body)] cursor-pointer hover:text-rose-gold/80 transition-colors"
-            >
-              <BookUser size={12} />
-              주소록
-            </button>
+            {contactPickerSupported ? (
+              <button
+                type="button"
+                onClick={handleContactPicker}
+                className="flex items-center gap-1 text-[11px] text-rose-gold font-semibold font-[family-name:var(--font-body)] cursor-pointer hover:text-rose-gold/80 transition-colors"
+              >
+                <BookUser size={12} />
+                주소록
+              </button>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <User size={16} className="text-rose-gold/60 shrink-0" />
@@ -117,6 +130,11 @@ export default function RecipientForm({
               className="w-full bg-transparent text-soft-black text-sm font-[family-name:var(--font-body)] outline-none placeholder:text-warm-gray/30"
             />
           </div>
+          {contactPickerSupported === false && (
+            <p className="mt-2 text-[11px] text-warm-gray/45 font-[family-name:var(--font-body)]">
+              주소록 연동은 지원 브라우저에서만 사용할 수 있어요. 직접 입력해 주세요.
+            </p>
+          )}
         </div>
       )}
 

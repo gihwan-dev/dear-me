@@ -13,6 +13,11 @@ import StepLetter from '@/components/write/steps/StepLetter';
 import StepDelivery from '@/components/write/steps/StepDelivery';
 import { addMaturityPeriod, toISOString } from '@/lib/dates';
 import { letterStyles } from '@/lib/letterStyles';
+import {
+  LETTER_ORDER_NAME,
+  LETTER_PRICE,
+  LETTER_PRICE_LABEL,
+} from '@/lib/paymentConstants';
 import type { MaturityPeriod } from '@/types/letter';
 
 // Step identifiers — order depends on mode
@@ -139,20 +144,42 @@ export default function WritePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      const { loadPaymentWidget } = await import(
-        '@tosspayments/payment-widget-sdk'
+      const { ANONYMOUS, loadTossPayments } = await import(
+        '@tosspayments/tosspayments-sdk'
       );
       const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
-      const paymentWidget = await loadPaymentWidget(clientKey, 'ANONYMOUS');
+      const tossPayments = await loadTossPayments(clientKey);
+      const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
 
-      await paymentWidget.requestPayment({
+      await widgets.requestPaymentWindow({
+        amount: {
+          currency: 'KRW',
+          value: data.paymentAmount ?? LETTER_PRICE,
+        },
         orderId: data.merchantUid,
-        orderName: 'Dear Me - 편지 배달',
+        orderName: LETTER_ORDER_NAME,
         successUrl: `${window.location.origin}/payment/success`,
         failUrl: `${window.location.origin}/payment/fail`,
+        customerName: senderName.trim(),
+        customerMobilePhone: recipientPhone.replace(/\D/g, ''),
       });
     } catch (err) {
-      if (err instanceof Error && err.message.includes('USER_CANCEL')) {
+      const errorCode =
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        typeof err.code === 'string'
+          ? err.code
+          : '';
+      const errorName =
+        err instanceof Error
+          ? err.name
+          : '';
+
+      if (
+        errorCode.includes('CANCEL') ||
+        errorName === 'UserCancelError'
+      ) {
         setIsLoading(false);
         return;
       }
@@ -201,12 +228,15 @@ export default function WritePage() {
               <StepSender
                 senderName={senderName}
                 onSenderNameChange={setSenderName}
+                onAdvance={goNext}
               />
             )}
             {currentStep === 'recipient' && (
               <StepRecipient
                 recipientName={recipientName}
                 onRecipientNameChange={setRecipientName}
+                onRecipientPhoneChange={setRecipientPhone}
+                onAdvance={goNext}
               />
             )}
             {currentStep === 'phone' && (
@@ -214,6 +244,7 @@ export default function WritePage() {
                 recipientPhone={recipientPhone}
                 isSelfLetter={isSelf}
                 onRecipientPhoneChange={setRecipientPhone}
+                onAdvance={goNext}
               />
             )}
             {currentStep === 'letter' && (
@@ -275,7 +306,7 @@ export default function WritePage() {
             ) : (
               <>
                 <CreditCard size={18} />
-                편지 보내기 (490원)
+                편지 보내기 ({LETTER_PRICE_LABEL})
               </>
             )}
           </button>
