@@ -18,6 +18,11 @@ import {
   LETTER_PRICE,
   LETTER_PRICE_LABEL,
 } from '@/lib/paymentConstants';
+import {
+  describePaymentFailure,
+  extractPaymentErrorCode,
+  extractPaymentErrorMessage,
+} from '@/lib/paymentOutcome';
 import type { MaturityPeriod } from '@/types/letter';
 
 // Step identifiers — order depends on mode
@@ -33,6 +38,11 @@ const slideVariants = {
     x: direction > 0 ? '-100%' : '100%',
     opacity: 0,
   }),
+};
+
+type PaymentFeedback = {
+  message: string;
+  tone: 'neutral' | 'critical';
 };
 
 export default function WritePage() {
@@ -55,7 +65,7 @@ export default function WritePage() {
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [paymentFeedback, setPaymentFeedback] = useState<PaymentFeedback | null>(null);
 
   // Dynamic steps based on mode
   const steps: StepId[] = useMemo(() => {
@@ -99,7 +109,7 @@ export default function WritePage() {
   const goNext = () => {
     if (stepIndex < steps.length - 1 && isStepValid(currentStep)) {
       setDirection(1);
-      setError('');
+      setPaymentFeedback(null);
       setStepIndex((s) => s + 1);
     }
   };
@@ -107,7 +117,7 @@ export default function WritePage() {
   const goBack = () => {
     if (stepIndex > 0) {
       setDirection(-1);
-      setError('');
+      setPaymentFeedback(null);
       // When going back from phone step and we're in self mode,
       // we need to skip recipient step which doesn't exist
       setStepIndex((s) => s - 1);
@@ -119,11 +129,12 @@ export default function WritePage() {
     if (!isStepValid('delivery')) return;
 
     setIsLoading(true);
-    setError('');
+    setPaymentFeedback(null);
 
     const maturityDate = computeMaturityDate();
     const isSelf = mode === 'self';
     const finalRecipientName = isSelf ? senderName : recipientName;
+    let orderId: string | null = null;
 
     try {
       const res = await fetch('/api/letters', {
@@ -143,6 +154,7 @@ export default function WritePage() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      orderId = data.merchantUid;
 
       const { ANONYMOUS, loadTossPayments } = await import(
         '@tosspayments/tosspayments-sdk'
@@ -150,6 +162,9 @@ export default function WritePage() {
       const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
       const tossPayments = await loadTossPayments(clientKey);
       const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
+      const failUrl = new URL('/payment/fail', window.location.origin);
+      failUrl.searchParams.set('orderId', data.merchantUid);
+      failUrl.searchParams.set('source', 'redirect');
 
       await widgets.requestPaymentWindow({
         amount: {
@@ -158,33 +173,40 @@ export default function WritePage() {
         },
         orderId: data.merchantUid,
         orderName: LETTER_ORDER_NAME,
-        successUrl: `${window.location.origin}/payment/success`,
-        failUrl: `${window.location.origin}/payment/fail`,
+        successUrl: `${window.location.origin}/payment/loading`,
+        failUrl: failUrl.toString(),
         customerName: senderName.trim(),
         customerMobilePhone: recipientPhone.replace(/\D/g, ''),
       });
     } catch (err) {
-      const errorCode =
-        err &&
-        typeof err === 'object' &&
-        'code' in err &&
-        typeof err.code === 'string'
-          ? err.code
-          : '';
-      const errorName =
-        err instanceof Error
-          ? err.name
-          : '';
+      const code = extractPaymentErrorCode(err);
+      const message = extractPaymentErrorMessage(err);
+      const presentation = describePaymentFailure({
+        code,
+        message,
+        source: 'sdk',
+      });
 
-      if (
-        errorCode.includes('CANCEL') ||
-        errorName === 'UserCancelError'
-      ) {
-        setIsLoading(false);
-        return;
+      if (orderId) {
+        await fetch('/api/payments/fail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId,
+            code: presentation.code,
+            message: presentation.rawMessage,
+            source: 'sdk',
+          }),
+        }).catch((recordError) => {
+          console.error('Payment failure record request failed:', recordError);
+        });
       }
+
       console.error('Payment request failed:', err);
-      setError('결제 요청 중 오류가 발생했어요. 다시 시도해주세요.');
+      setPaymentFeedback({
+        message: presentation.inlineMessage,
+        tone: presentation.tone,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -272,13 +294,18 @@ export default function WritePage() {
       </div>
 
       {/* Error message */}
-      {error && (
+      {paymentFeedback && (
         <motion.p
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-sm text-rose-gold text-center font-[family-name:var(--font-body)] px-5 pb-2"
+          role="alert"
+          aria-live="polite"
+          className={`
+            text-sm text-center font-[family-name:var(--font-body)] px-5 pb-2
+            ${paymentFeedback.tone === 'neutral' ? 'text-warm-gray/70' : 'text-rose-gold'}
+          `}
         >
-          {error}
+          {paymentFeedback.message}
         </motion.p>
       )}
 

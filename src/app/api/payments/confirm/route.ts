@@ -27,7 +27,10 @@ export async function POST(request: Request) {
     console.error('Payment confirm error:', err);
 
     if (err instanceof PaymentConfirmationError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
+      return NextResponse.json(
+        { error: err.message, code: err.code },
+        { status: err.status },
+      );
     }
 
     const message = err instanceof Error ? err.message : 'Payment confirmation failed';
