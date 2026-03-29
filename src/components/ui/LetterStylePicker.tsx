@@ -28,6 +28,8 @@ export default function LetterStylePicker({ selected, onSelect }: LetterStylePic
             borderColor: style.lineColor,
           }}
           title={style.label}
+          aria-label={`${style.label} 편지지 스타일`}
+          aria-pressed={selected === style.key}
         >
           {style.hasLines && (
             <div className="w-full h-full flex flex-col justify-end gap-[3px] p-1.5 overflow-hidden">

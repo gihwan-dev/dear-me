@@ -35,18 +35,18 @@ export default function StepSender({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-6">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           보내는 사람은 누구인가요?
         </h2>
-        <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)]">
+        <p className="text-sm text-warm-gray/80 mt-2 font-[family-name:var(--font-body)]">
           편지에 이름이 함께 전달돼요
         </p>
       </div>
 
       <div className="flex-1">
-        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30">
-          <label className="text-xs text-warm-gray/60 font-semibold font-[family-name:var(--font-body)] mb-2 block">
+        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30 focus-within:border-rose-gold/50 focus-within:shadow-soft transition-all duration-200">
+          <label className="text-xs text-warm-gray/80 font-semibold font-[family-name:var(--font-body)] mb-2 block">
             보내는 사람
           </label>
           <div className="flex items-center gap-3">

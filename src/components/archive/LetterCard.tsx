@@ -61,7 +61,7 @@ export default function LetterCard({ letter, onClick, index }: LetterCardProps) 
           <h3 className="font-[family-name:var(--font-heading)] font-semibold text-soft-black text-[15px] truncate">
             {letter.title}
           </h3>
-          <p className="text-[11px] text-warm-gray/60 mt-0.5 font-[family-name:var(--font-body)]">
+          <p className="text-[12px] text-warm-gray/70 mt-0.5 font-[family-name:var(--font-body)]">
             {formatDisplayDate(letter.createdAt)} 작성
           </p>
           <div className="mt-2.5">

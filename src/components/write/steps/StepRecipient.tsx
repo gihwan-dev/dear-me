@@ -76,19 +76,19 @@ export default function StepRecipient({
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-6">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           누구에게 보낼까요?
         </h2>
-        <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)]">
+        <p className="text-sm text-warm-gray/80 mt-2 font-[family-name:var(--font-body)]">
           편지를 받을 분의 이름을 알려주세요
         </p>
       </div>
 
       <div className="flex-1">
-        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30">
+        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30 focus-within:border-rose-gold/50 focus-within:shadow-soft transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs text-warm-gray/60 font-semibold font-[family-name:var(--font-body)]">
+            <label className="text-xs text-warm-gray/80 font-semibold font-[family-name:var(--font-body)]">
               받는 사람
             </label>
             {contactPickerSupported ? (
@@ -118,7 +118,7 @@ export default function StepRecipient({
             />
           </div>
           {contactPickerSupported === false && (
-            <p className="mt-3 text-xs text-warm-gray/45 font-[family-name:var(--font-body)]">
+            <p className="mt-3 text-xs text-warm-gray/70 font-[family-name:var(--font-body)]">
               주소록 연동은 지원 브라우저에서만 사용할 수 있어요. 직접 입력해 주세요.
             </p>
           )}

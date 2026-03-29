@@ -83,8 +83,17 @@
   80% { transform: translateX(4px); }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--color-cream);
+  color: var(--color-soft-black);
+}
+
+::selection {
+  background: rgba(212, 168, 154, 0.25);
   color: var(--color-soft-black);
 }
 

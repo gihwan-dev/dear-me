@@ -55,14 +55,14 @@ export default function StepPhone({
             ? '편지를 받을 내 번호를\n알려주세요'
             : '편지를 받을 분의 번호를\n알려주세요'}
         </h2>
-        <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)]">
+        <p className="text-sm text-warm-gray/80 mt-2 font-[family-name:var(--font-body)]">
           정해진 날짜에 문자로 편지가 전달돼요
         </p>
       </div>
 
       <div className="flex-1">
-        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30">
-          <label className="text-xs text-warm-gray/60 font-semibold font-[family-name:var(--font-body)] mb-2 block">
+        <div className="bg-white/80 rounded-2xl p-5 border border-blush/30 focus-within:border-rose-gold/50 focus-within:shadow-soft transition-all duration-200">
+          <label className="text-xs text-warm-gray/80 font-semibold font-[family-name:var(--font-body)] mb-2 block">
             {isSelfLetter ? '내 전화번호' : '받는 사람 전화번호'}
           </label>
           <div className="flex items-center gap-3">

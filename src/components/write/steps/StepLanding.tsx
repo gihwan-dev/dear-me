@@ -2,11 +2,14 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Sparkles from '@/components/ui/Sparkles';
 
 export default function StepLanding() {
   return (
     <div className="flex flex-col items-center justify-center h-full px-8 text-center overflow-hidden">
       <div className="relative">
+        <Sparkles count={5} />
+
         {/* Hero illustration */}
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }}
@@ -40,7 +43,7 @@ export default function StepLanding() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="relative z-10 text-sm text-warm-gray/70 font-[family-name:var(--font-body)] leading-relaxed max-w-[260px] mx-auto"
+          className="relative z-10 text-sm text-warm-gray font-[family-name:var(--font-body)] leading-relaxed max-w-[300px] mx-auto"
         >
           미래의 나에게, 혹은 소중한 사람에게<br />
           마음을 담은 편지를 보내보세요

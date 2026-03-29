@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface SparklesProps {
@@ -17,16 +18,26 @@ function StarSVG({ size, color }: { size: number; color: string }) {
   );
 }
 
+// Deterministic pseudo-random based on index for stable layout
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
+}
+
 export default function Sparkles({ count = 7, className = '' }: SparklesProps) {
-  const sparkles = Array.from({ length: count }, (_, i) => ({
-    id: i,
-    top: `${Math.random() * 90 + 5}%`,
-    left: `${Math.random() * 90 + 5}%`,
-    size: Math.random() * 10 + 6,
-    color: sparkleColors[i % sparkleColors.length],
-    delay: Math.random() * 2,
-    duration: Math.random() * 2 + 2,
-  }));
+  const sparkles = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        top: `${seededRandom(i * 3) * 90 + 5}%`,
+        left: `${seededRandom(i * 3 + 1) * 90 + 5}%`,
+        size: seededRandom(i * 3 + 2) * 10 + 6,
+        color: sparkleColors[i % sparkleColors.length],
+        delay: seededRandom(i * 5) * 2,
+        duration: seededRandom(i * 5 + 1) * 2 + 2,
+      })),
+    [count],
+  );
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>

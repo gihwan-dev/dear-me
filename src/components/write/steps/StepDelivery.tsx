@@ -35,7 +35,7 @@ export default function StepDelivery({
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           언제 전달할까요?
         </h2>
-        <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)]">
+        <p className="text-sm text-warm-gray/80 mt-2 font-[family-name:var(--font-body)]">
           편지가 봉인되어 있다가 해당 날짜에 전달돼요
         </p>
       </div>

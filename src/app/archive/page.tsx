@@ -34,46 +34,37 @@ export default function ArchivePage() {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="py-2 px-5 space-y-0"
     >
-      {/* Header + New Letter — one visual block */}
-      <div className="space-y-4 pb-6">
-        <div>
-          <p className="text-[11px] text-rose-gold tracking-[0.2em] font-semibold font-[family-name:var(--font-body)]">
-            보관함
-          </p>
-          <h2 className="font-[family-name:var(--font-title-hand)] text-2xl text-soft-black mt-1">
-            시간 여행 중인 편지들
-          </h2>
-          <p className="text-sm text-warm-gray/60 mt-2 font-[family-name:var(--font-body)] leading-relaxed">
-            마음을 담은 편지가 시간을 건너 전달될 날을 기다리고 있어요.
-          </p>
+      {/* Header + New Letter */}
+      <div className="pb-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="font-[family-name:var(--font-title-hand)] text-2xl text-soft-black">
+              시간 여행 중인 편지들
+            </h2>
+            <p className="text-sm text-warm-gray/70 mt-1.5 font-[family-name:var(--font-body)] leading-relaxed">
+              마음을 담은 편지가 전달될 날을 기다리고 있어요.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/')}
+            className="
+              inline-flex items-center gap-1.5 shrink-0
+              px-4 py-2 rounded-full
+              border border-rose-gold text-rose-gold text-xs font-semibold
+              font-[family-name:var(--font-body)]
+              bg-transparent hover:bg-rose-gold-light/30
+              transition-all duration-200 cursor-pointer
+              active:scale-[0.97]
+            "
+          >
+            <PenLine size={14} />
+            새 편지
+          </button>
         </div>
-
-        {/* New Letter — block button, no <a> wrapper around <button> */}
-        <button
-          onClick={() => router.push('/')}
-          className="
-            inline-flex items-center gap-2
-            px-5 py-2.5 rounded-[var(--radius-button)]
-            border border-rose-gold text-rose-gold text-sm font-semibold
-            font-[family-name:var(--font-body)]
-            bg-transparent hover:bg-rose-gold-light/30
-            transition-all duration-200 cursor-pointer
-            active:scale-[0.97]
-          "
-        >
-          <PenLine size={16} />
-          새 편지 쓰기
-        </button>
       </div>
 
-      {/* Divider */}
-      <div className="border-t border-blush/40 mb-5" />
-
       {/* Filter */}
-      <div className="space-y-2 pb-4">
-        <p className="text-[10px] text-warm-gray/50 tracking-[0.15em] uppercase font-semibold font-[family-name:var(--font-body)]">
-          필터
-        </p>
+      <div className="pb-4">
         <FilterTabs activeFilter={filter} onFilterChange={setFilter} />
       </div>
 

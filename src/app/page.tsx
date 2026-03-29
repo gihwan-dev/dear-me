@@ -309,6 +309,9 @@ export default function WritePage() {
         </motion.p>
       )}
 
+      {/* Gradient fade above CTA */}
+      <div className="h-6 bg-gradient-to-t from-cream to-transparent pointer-events-none" />
+
       {/* Bottom fixed button — always visible, same position */}
       <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         {isLastStep ? (

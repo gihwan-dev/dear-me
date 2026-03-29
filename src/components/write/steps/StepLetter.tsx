@@ -72,7 +72,7 @@ export default function StepLetter({
         style={{
           backgroundColor: style.bgColor,
           borderColor: style.lineColor,
-          boxShadow: `0 0 0 4px ${style.bgColor}, 0 0 0 5px ${style.lineColor}, 0 4px 20px rgba(212, 168, 154, 0.10)`,
+          boxShadow: `0 0 0 4px ${style.bgColor}, 0 0 0 5px ${style.lineColor}, 0 6px 24px rgba(212, 168, 154, 0.15), 0 2px 8px rgba(212, 168, 154, 0.08)`,
           ...(style.hasLines
             ? {
                 backgroundImage: `repeating-linear-gradient(
@@ -140,16 +140,20 @@ export default function StepLetter({
               padding: 0,
             }}
           />
+
+          {/* From — inside the paper */}
+          <p
+            className="text-right font-[family-name:var(--font-handwriting)] opacity-50 mt-2"
+            style={{
+              color: style.textColor,
+              fontSize: 14,
+              lineHeight: `${LINE_HEIGHT}px`,
+            }}
+          >
+            From. {senderName || '...'}
+          </p>
         </div>
       </div>
-
-      {/* From — outside the paper, below it */}
-      <p
-        className="text-right pr-2 pb-1 font-[family-name:var(--font-handwriting)] opacity-50"
-        style={{ color: style.textColor, fontSize: 14 }}
-      >
-        From. {senderName || '...'}
-      </p>
     </div>
   );
 }

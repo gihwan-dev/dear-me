@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Heart, Send } from 'lucide-react';
 
 interface StepModeProps {
   mode: 'self' | 'send';
@@ -9,26 +10,27 @@ interface StepModeProps {
 
 export default function StepMode({ mode, onModeChange }: StepModeProps) {
   const options = [
-    { value: 'self' as const, label: '나에게', desc: '미래의 내가 읽을 편지' },
-    { value: 'send' as const, label: '누군가에게', desc: '소중한 사람에게 보내는 편지' },
+    { value: 'self' as const, label: '나에게', desc: '미래의 내가 읽을 편지', icon: Heart },
+    { value: 'send' as const, label: '누군가에게', desc: '소중한 사람에게 보내는 편지', icon: Send },
   ];
 
   return (
     <div className="flex flex-col h-full px-5">
-      <div className="pt-4 pb-8">
+      <div className="pt-4 pb-6">
         <h2 className="font-[family-name:var(--font-title-hand)] text-3xl text-soft-black">
           누구에게 보낼까요?
         </h2>
       </div>
 
       <div className="space-y-3 flex-1">
-        {options.map(({ value, label, desc }) => (
+        {options.map(({ value, label, desc, icon: Icon }) => (
           <motion.button
             key={value}
             whileTap={{ scale: 0.98 }}
             onClick={() => onModeChange(value)}
+            aria-pressed={mode === value}
             className={`
-              w-full py-5 px-5 rounded-2xl text-left transition-all duration-200 cursor-pointer
+              w-full py-5 px-5 rounded-2xl text-left transition-all duration-200 cursor-pointer flex items-center gap-4
               ${
                 mode === value
                   ? 'bg-rose-gold text-white shadow-soft'
@@ -36,16 +38,25 @@ export default function StepMode({ mode, onModeChange }: StepModeProps) {
               }
             `}
           >
-            <span className="text-base font-semibold font-[family-name:var(--font-body)] block">
-              {label}
-            </span>
-            <span
-              className={`text-xs mt-1 block font-[family-name:var(--font-body)] ${
-                mode === value ? 'text-white/70' : 'text-warm-gray/50'
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                mode === value ? 'bg-white/20' : 'bg-blush-light'
               }`}
             >
-              {desc}
-            </span>
+              <Icon size={20} className={mode === value ? 'text-white' : 'text-rose-gold'} />
+            </div>
+            <div>
+              <span className="text-base font-semibold font-[family-name:var(--font-body)] block">
+                {label}
+              </span>
+              <span
+                className={`text-xs mt-1 block font-[family-name:var(--font-body)] ${
+                  mode === value ? 'text-white/70' : 'text-warm-gray/70'
+                }`}
+              >
+                {desc}
+              </span>
+            </div>
           </motion.button>
         ))}
       </div>
